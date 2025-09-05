@@ -1,27 +1,26 @@
-import styles from "./app.module.css"
+import styles from './app.module.css'
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react'
 
-import { WORDS } from "./utils/words.ts"
-import type { Challenge } from "./utils/words.ts"
+import { WORDS } from './utils/words.ts'
+import type { Challenge } from './utils/words.ts'
 
-import { Header } from "./components/Header"
-import { Tip } from "./components/Tip"
-import { Letter } from "./components/Letter"
-import { Input } from "./components/Input"
-import { Button } from "./components/Button"
-import { LettersUsed } from "./components/LettersUsed"
-import type { LettersUsedProps } from "./components/LettersUsed"
+import { Header } from './components/Header'
+import { Tip } from './components/Tip'
+import { Letter } from './components/Letter'
+import { Input } from './components/Input'
+import { Button } from './components/Button'
+import { LettersUsed } from './components/LettersUsed'
+import type { LettersUsedProps } from './components/LettersUsed'
 
 export default function App() {
-  const [attempts, setAttempts] = useState(0)
-  const [letter, setLetter] = useState("")
+  const [letter, setLetter] = useState('')
   const [challenge, setChallenge] = useState<Challenge | null>(null)
   const [lettersUsed, setLettersUsed] = useState<LettersUsedProps[]>([])
   const [score, setScore] = useState(0)
 
   function handleRestartGame() {
-    alert("Reiniciar o jogo!")
+    alert('Reiniciar o jogo!')
   }
 
   function startGame() {
@@ -30,8 +29,9 @@ export default function App() {
 
     setChallenge(randomWord)
 
-    setAttempts(0)
-    setLetter("")
+    setScore(0)
+    setLetter('')
+    setLettersUsed([])
   }
 
   function handleConfirm() {
@@ -40,7 +40,7 @@ export default function App() {
     }
 
     if (!letter.trim()) {
-      return alert("Digite uma letra!")
+      return alert('Digite uma letra!')
     }
 
     const value = letter.toUpperCase()
@@ -49,17 +49,20 @@ export default function App() {
     )
 
     if (exists) {
-      return alert("Você já utilizou a letra " + value)
+      return alert('Você já utilizou a letra ' + value)
     }
 
-    const hits = challenge.word.toUpperCase().split("").filter((char) => char === value).length
+    const hits = challenge.word
+      .toUpperCase()
+      .split('')
+      .filter((char) => char === value).length
 
     const correct = hits > 0
     const currentScore = score + hits
 
     setLettersUsed((prevState) => [...prevState, { value, correct }])
     setScore(currentScore)
-    setLetter("")
+    setLetter('')
   }
 
   useEffect(() => {
@@ -73,14 +76,20 @@ export default function App() {
   return (
     <div className={styles.container}>
       <main>
-        <Header current={attempts} max={10} onRestart={handleRestartGame} />
+        <Header current={score} max={10} onRestart={handleRestartGame} />
 
         <Tip tip={challenge.tip} />
 
         <div className={styles.word}>
-          {challenge.word.split("").map(() => (
-            <Letter value="" />
-          ))}
+          {challenge.word.split('').map((letter, index) => {
+            const letterUsed = lettersUsed.find(
+              (used) => used.value.toUpperCase() === letter.toUpperCase(),
+            )
+
+            console.log(letterUsed)
+
+            return <Letter key={index} value={letterUsed?.value} color={letterUsed?.correct ? "correct" : "default"} />
+          })}
         </div>
 
         <h4>Palpite</h4>
