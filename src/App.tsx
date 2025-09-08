@@ -13,6 +13,8 @@ import { Button } from './components/Button'
 import { LettersUsed } from './components/LettersUsed'
 import type { LettersUsedProps } from './components/LettersUsed'
 
+const ATTEMPTS_MARGIN = 5
+
 export default function App() {
   const [letter, setLetter] = useState('')
   const [challenge, setChallenge] = useState<Challenge | null>(null)
@@ -49,6 +51,7 @@ export default function App() {
     )
 
     if (exists) {
+      setLetter('')
       return alert('Você já utilizou a letra ' + value)
     }
 
@@ -65,9 +68,31 @@ export default function App() {
     setLetter('')
   }
 
+  function endGame(message: string) {
+    alert(message)
+    startGame()
+  }
+
   useEffect(() => {
     startGame()
   }, [])
+
+  useEffect(() => {
+    if (!challenge) {
+      return
+    }
+
+    setTimeout(() => {
+      if (score === challenge.word.length) {
+        return endGame('Parabéns, você descobriu a palavra!')
+      }
+
+      const attemptLimit = challenge.word.length + ATTEMPTS_MARGIN
+      if (lettersUsed.length === attemptLimit) {
+        return endGame('Que pena, você usou todas as tentativas!')
+      }
+    }, 200)
+  }, [score, lettersUsed.length])
 
   if (!challenge) {
     return
@@ -76,7 +101,11 @@ export default function App() {
   return (
     <div className={styles.container}>
       <main>
-        <Header current={score} max={10} onRestart={handleRestartGame} />
+        <Header
+          current={lettersUsed.length}
+          max={challenge.word.length + ATTEMPTS_MARGIN}
+          onRestart={handleRestartGame}
+        />
 
         <Tip tip={challenge.tip} />
 
@@ -88,7 +117,13 @@ export default function App() {
 
             console.log(letterUsed)
 
-            return <Letter key={index} value={letterUsed?.value} color={letterUsed?.correct ? "correct" : "default"} />
+            return (
+              <Letter
+                key={index}
+                value={letterUsed?.value}
+                color={letterUsed?.correct ? 'correct' : 'default'}
+              />
+            )
           })}
         </div>
 
